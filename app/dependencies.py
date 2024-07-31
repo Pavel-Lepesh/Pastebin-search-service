@@ -6,11 +6,13 @@ from fastapi import HTTPException
 
 async def get_elastic_client() -> AsyncElasticsearch:
     try:
-        return AsyncElasticsearch(
+        client = AsyncElasticsearch(
             [{'host': settings.ES_HOST, 'port': settings.ES_PORT, 'scheme': settings.ES_SCHEME}],
-            # basic_auth=("login", "pass"), for prod
             verify_certs=False,
             ssl_show_warn=False,
         )
+        if not await client.ping():
+            raise ConnectionError("Elastic connection error")
+        return client
     except ConnectionError:
         raise HTTPException(status_code=500, detail="Elastic connection error")

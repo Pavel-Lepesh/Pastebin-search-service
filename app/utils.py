@@ -8,3 +8,10 @@ async def create_index(index_name: str, es_instance: AsyncElasticsearch, mapping
         index.settings(**ind_settings)
         await index.create()
         await index.put_mapping(body=mapping if mapping else {})
+
+
+def extract_data(data: dict):
+    result = []
+    for r in data['hits']['hits']:
+        result.append(r['_source'])
+    return result
