@@ -1,4 +1,5 @@
 /.env
+/.env.test
 /.idea
 /app/__pycache__/
 /app/search/__pycache__/

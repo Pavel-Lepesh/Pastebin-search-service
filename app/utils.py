@@ -11,6 +11,9 @@ async def create_index(index_name: str, es_instance: AsyncElasticsearch, mapping
 
 
 def extract_data(data: dict):
+    """
+    Allows to implicitly extract data from an ElasticSearch response.
+    """
     result = []
     for r in data['hits']['hits']:
         result.append(r['_source'])

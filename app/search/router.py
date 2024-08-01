@@ -42,3 +42,17 @@ async def main_search(query: Annotated[str, Query(max_length=255)],
     search.update_from_dict(query_dict)
     result = await search.execute()
     return extract_data(result.to_dict())
+
+
+@router.delete("/delete_doc/{hash_link}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_document(hash_link: str, es: Annotated[AsyncElasticsearch, Depends(get_elastic_client)]):
+    query_dict = {
+        "query": {
+            "term": {
+                "hash_link": hash_link
+            }
+        }
+    }
+    search = AsyncSearch(using=es, index='notes')
+    search.update_from_dict(query_dict)
+    await search.delete()

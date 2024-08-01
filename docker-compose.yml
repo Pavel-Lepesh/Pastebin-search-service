@@ -1,6 +1,19 @@
 version: "3.8"
 
 services:
+  search_service:
+    container_name: search_service
+    build:
+      context: .
+    env_file:
+      - ./.env.test
+    ports:
+      - "82:82"
+    networks:
+      - elastic
+    depends_on:
+      - elasticsearch
+      - kibana
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
     container_name: elasticsearch
