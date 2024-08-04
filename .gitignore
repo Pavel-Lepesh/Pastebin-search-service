@@ -3,3 +3,6 @@
 /.idea
 /app/__pycache__/
 /app/search/__pycache__/
+/log_file.log
+/error_logs.log
+/producer.py

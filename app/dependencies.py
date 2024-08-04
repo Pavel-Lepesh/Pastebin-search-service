@@ -2,8 +2,10 @@ from elasticsearch import AsyncElasticsearch
 from elastic_transport import ConnectionError
 from app.config import settings
 from fastapi import HTTPException
+from loguru import logger
 
 
+@logger.catch
 async def get_elastic_client() -> AsyncElasticsearch:
     try:
         client = AsyncElasticsearch(
@@ -15,4 +17,5 @@ async def get_elastic_client() -> AsyncElasticsearch:
             raise ConnectionError("Elastic connection error")
         return client
     except ConnectionError:
+        logger.critical("Connection error has occurred")
         raise HTTPException(status_code=500, detail="Elastic connection error")

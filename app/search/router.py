@@ -8,6 +8,7 @@ from typing import Annotated
 from app.dependencies import get_elastic_client
 from app.search.documents import NoteDoc
 from app.utils import extract_data
+from loguru import logger
 
 
 router = APIRouter(
@@ -20,6 +21,7 @@ async def create_document(body: NoteScheme, es: Annotated[AsyncElasticsearch, De
     try:
         doc = NoteDoc(**body.dict())
         response = await doc.save(using=es)
+        logger.info(f"New document \"{body.title}\" (hash link: {body.hash_link}) was created")
         return IndexResponseScheme(**{"operation_result": response})
     except ResponseValidationError:
         raise HTTPException(status_code=500, detail="Elastic indexing response error")
@@ -56,3 +58,4 @@ async def delete_document(hash_link: str, es: Annotated[AsyncElasticsearch, Depe
     search = AsyncSearch(using=es, index='notes')
     search.update_from_dict(query_dict)
     await search.delete()
+    logger.info(f"Document (hash link: {hash_link}) was deleted")

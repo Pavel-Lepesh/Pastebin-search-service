@@ -1,5 +1,6 @@
 from elasticsearch import AsyncElasticsearch
 from elasticsearch_dsl import Index
+from loguru import logger
 
 
 async def create_index(index_name: str, es_instance: AsyncElasticsearch, mapping: dict, ind_settings: dict):
@@ -8,6 +9,9 @@ async def create_index(index_name: str, es_instance: AsyncElasticsearch, mapping
         index.settings(**ind_settings)
         await index.create()
         await index.put_mapping(body=mapping if mapping else {})
+        logger.info(f"\"{index_name}\" index was created")
+    else:
+        logger.info(f"\"{index_name}\" index already exists")
 
 
 def extract_data(data: dict):
