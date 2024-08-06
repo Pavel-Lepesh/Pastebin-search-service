@@ -27,7 +27,6 @@ services:
       - elastic
     volumes:
       - esdata:/usr/share/elasticsearch/data
-
   kibana:
     image: docker.elastic.co/kibana/kibana:8.14.3
     container_name: kibana
