@@ -28,6 +28,7 @@ logger.add(
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    await asyncio.sleep(20)  # waiting for the kafka to launch
     for index in indices_list:
         await create_index(
             index_name=index.index_name,

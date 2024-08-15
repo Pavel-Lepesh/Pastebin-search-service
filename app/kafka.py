@@ -1,10 +1,10 @@
 from aiokafka import AIOKafkaConsumer
 from aiokafka.errors import KafkaError
-from config import settings
+from app.config import settings
 from loguru import logger
 from elasticsearch import AsyncElasticsearch
 
-from search.documents import NoteDoc
+from app.search.documents import NoteDoc
 
 
 class KafkaConsumer:
