@@ -14,11 +14,15 @@ async def create_index(index_name: str, es_instance: AsyncElasticsearch, mapping
         logger.info(f"\"{index_name}\" index already exists")
 
 
-def extract_data(data: dict):
+def extract_data(data: dict, only_ids=False) -> list:
     """
     Allows to implicitly extract data from an ElasticSearch response.
     """
     result = []
-    for r in data['hits']['hits']:
-        result.append(r['_source'])
+    if only_ids:
+        for r in data['hits']['hits']:
+            result.append(r['_id'])
+    else:
+        for r in data['hits']['hits']:
+            result.append(r['_source'])
     return result

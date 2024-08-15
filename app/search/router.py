@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, status, HTTPException, Query
+from fastapi import APIRouter, Depends, status, HTTPException, Query, Path
 from fastapi.exceptions import ResponseValidationError
 
 from app.search.schemas import NoteScheme, IndexResponseScheme
 from elasticsearch import AsyncElasticsearch
+from elastic_transport import ConnectionError
 from elasticsearch_dsl import AsyncSearch
 from typing import Annotated
 from app.dependencies import get_elastic_client
@@ -25,6 +26,40 @@ async def create_document(body: NoteScheme, es: Annotated[AsyncElasticsearch, De
         return IndexResponseScheme(**{"operation_result": response})
     except ResponseValidationError:
         raise HTTPException(status_code=500, detail="Elastic indexing response error")
+
+
+@router.put("/update_doc/{hash_link}", status_code=status.HTTP_201_CREATED)
+async def update_document(hash_link: Annotated[str, Path(max_length=11)],
+                          title: Annotated[str, Query(max_length=100)],
+                          es: Annotated[AsyncElasticsearch, Depends(get_elastic_client)]):
+    try:
+        query_dict = {
+            "query": {
+                "term": {
+                    "hash_link": hash_link
+                }
+            }
+        }
+        search = AsyncSearch(using=es, index="notes")
+        search.update_from_dict(query_dict)
+        search_result = await search.execute()
+
+        data: list = extract_data(search_result.to_dict(), only_ids=True)
+        logger.info(f"search data: {data}")
+        if not data:
+            raise HTTPException(404, "Document not found")
+        if len(data) > 1:
+            logger.error(f"There is more than one document with a hash link: {hash_link}")
+        await es.update(
+            index="notes",
+            id=data[0],
+            doc={
+                "title": title
+            }
+        )
+    except ConnectionError as error:
+        logger.error(error)
+        raise HTTPException(500, "Connection error")
 
 
 @router.get("/search", status_code=status.HTTP_200_OK)
